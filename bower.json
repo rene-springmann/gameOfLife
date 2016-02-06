@@ -1,0 +1,29 @@
+{
+  "name": "gameOfLife",
+  "homepage": "https://github.com/rene-springmann/gameOfLife",
+  "authors": [
+    "Rene Springman <info@rene-springmann.de>"
+  ],
+  "description": "This project is a javascript implementation of Conway's Game of Life.",
+  "main": "index.html",
+  "moduleType": [],
+  "keywords": [
+    "game",
+    "conway",
+    "javascript"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.*",
+    "jquery": "~2.2.*",
+    "jquery-ui": "~1.11.*"
+
+  }
+}
