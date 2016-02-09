@@ -8,21 +8,25 @@
     game.dimensions = {x : 30, y : 30};
     game.playground = null;
     game.cells = {};
-    game.debug = false;
+    game.debug = true;
+    game.startLifePercentage = 30.00;
 
     game.init = function(playground){
         this.playground = playground;
         this.drawPlayground();
+        this.fillWithRandom();
+        this.refreshPlayground();
+        this.evolve();
     };
 
     game.drawPlayground = function(){
-        for (y = 0; y < this.dimensions.y; y++) {
+        for (var y = 0; y < this.dimensions.y; y++) {
             var rowElement = $('<div>', {class: 'playground-row'});
             this.playground.append(rowElement);
             var row = $(rowElement);
             row.data('row-id', y);
             this.cells[y] = {};
-            for (x = 0; x < this.dimensions.x; x++) {
+            for (var x = 0; x < this.dimensions.x; x++) {
                 var cellElement = $('<div>', {class: 'playground-cell', id: 'cell-' + y + '-' + x});
                 row.append(cellElement);
                 var cell = $(cellElement);
@@ -35,14 +39,10 @@
     };
 
     game.refreshPlayground = function(){
-        this.cells[7][9]= true;
-        this.cells[25][10]= true;
-        this.cells[13][10]= true;
-        this.cells[2][23]= true;
-        for (y = 0; y < this.dimensions.y; y++) {
-            for (x = 0; x < this.dimensions.x; x++) {
+        for (var y = 0; y < this.dimensions.y; y++) {
+            for (var x = 0; x < this.dimensions.x; x++) {
                 if (this.cells[y][x]) {
-                    this.playground.find('#cell-' + y + '-' + x).addClass('alive', 400, 'easeInOutQuart');
+                    this.playground.find('#cell-' + y + '-' + x).addClass('alive', 500, 'easeInOutQuart');
                 }
                 else {
                     this.playground.find('#cell-' + y + '-' + x).removeClass('alive');
@@ -50,5 +50,55 @@
             }
         }
     };
+
+    game.fillWithRandom = function(){
+        var numOfCells = this.dimensions.x * this.dimensions.y;
+        var startCells = ( numOfCells / 100 ) * this.startLifePercentage;
+        var i = 0;
+
+        while ( i < startCells) {
+            var randX = Math.floor((Math.random() * this.dimensions.x));
+            var randY = Math.floor((Math.random() * this.dimensions.y));
+            if( this.cells[randY][randX] !== true) {
+                this.cells[randY][randX] = true;
+                i++;
+            }
+        }
+    };
+
+    game.evolve = function(){
+        var newCells = {};
+
+        for (var y = 0; y < this.dimensions.y; y++) {
+            for (var x = 0; x < this.dimensions.x; x++) {
+                var livingNeighbours = 0;
+
+                //left top
+                if(x > 0 && y > 0 && this.cells[y - 1][x - 1]) { livingNeighbours ++; }
+                //top
+                if( y > 0 && this.cells[y - 1][x]) { livingNeighbours ++; }
+                //right top
+                if( (x + 1) < this.dimensions.x && y > 0 && this.cells[y - 1][x + 1]) { livingNeighbours ++; }
+                //left
+                if( x > 0 && this.cells[y][x - 1]) { livingNeighbours ++; }
+                //right
+                if( (x + 1) < this.dimensions.x && this.cells[y][x + 1]){ livingNeighbours ++; }
+                //left bottom
+                if( x > 0 && (y + 1) < this.dimensions.y && this.cells[y + 1][x - 1]){ livingNeighbours ++; }
+                //bottom
+                if( (y + 1) < this.dimensions.y && this.cells[y + 1][x]){ livingNeighbours ++; }
+                //right bottom
+                if( (y + 1) < this.dimensions.y && (x + 1) < this.dimensions.x && this.cells[y + 1][x + 1]){ livingNeighbours ++; }
+
+                if(this.debug) {
+                    cell = this.playground.find('#cell-' + y + '-' + x);
+                    cell.html(cell.html() + '<br><b>' + livingNeighbours + '</b>');
+                }
+                //todo implement check if die or come alive or stay alive and set nwe state
+
+                //this.refreshPlayground();
+            }
+        }
+    }
 
 })(jQuery);
