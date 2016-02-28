@@ -5,13 +5,14 @@
      */
     window.game = window.game || {};
 
-    game.dimensions = {x : 120, y : 60};
+    game.dimensions = {x : 60, y : 40};
     game.playground = null;
     game.cells = {};
     game.debug = false;
     game.startLifePercentage = 30.00;
     game.livingCells = 0;
     game.stepCounter = 0;
+    game.interval = null;
 
     game.init = function(playground){
         this.playground = playground;
@@ -19,8 +20,18 @@
         this.drawPlayground();
         this.fillWithRandom();
         this.refreshPlayground();
-        $('#single-step-button').click(function(){game.evolve();});
-        //this.evolve();
+
+        $('#single-step-button').click(function(){
+            game.evolve();
+        });
+
+        $('#start-button').click(function(){
+            game.start();
+        });
+
+        $('#stop-button').click(function(){
+            game.stop();
+        }).addClass('disabled');
     };
 
     game.drawPlayground = function(){
@@ -75,7 +86,9 @@
     };
 
     game.evolve = function(){
+        console.debug('evolve');
         var newCells = this.cells;
+        var livingCells= 0;
 
         for (var y = 0; y < this.dimensions.y; y++) {
             for (var x = 0; x < this.dimensions.x; x++) {
@@ -99,19 +112,20 @@
                 if( (y + 1) < this.dimensions.y && (x + 1) < this.dimensions.x && this.cells[y + 1][x + 1]){ livingNeighbours ++; }
 
                 if(this.debug) {
-                    cell = this.playground.find('#cell-' + y + '-' + x);
+                    var cell = this.playground.find('#cell-' + y + '-' + x);
                     cell.html(cell.html() + '<br><b>' + livingNeighbours + '</b>');
                 }
-                //todo implement check if die or come alive or stay alive and set nwe state
 
                 if(livingNeighbours < 2) { // a cell with less then 2 neighbours dies of loneliness
                     newCells[y][x]= false;
                 }
-                else if(livingNeighbours == 2 && this.cells[y][x]) { // a living cell with 2 neightbours stays alive
+                else if(livingNeighbours == 2 && this.cells[y][x]) { // a living cell with 2 neighbours stays alive
                     newCells[y][x]= true;
+                    livingCells++;
                 }
                 else if(livingNeighbours == 3) { // a cell with 3 neighbours stays alive or is born
                     newCells[y][x]= true;
+                    livingCells++;
                 }
                 else if(livingNeighbours > 3) { // a cell with more than 3 neighbors dies of overpopulation
                     newCells[y][x]= false;
@@ -120,8 +134,31 @@
             }
         }
         this.cells = newCells;
+        this.livingCells = livingCells;
         this.stepCounter ++;
         this.refreshPlayground();
-    }
+    };
+
+    game.start = function(){
+
+        $('#start-button').addClass('disabled');
+        $('#single-step-button').addClass('disabled');
+
+        if (!this.interval) {
+            this.interval = setInterval(function() {
+                if (game.livingCells > 0) {
+                    game.evolve();
+                }
+                else {
+                    game.stop();
+                }
+            }, 2000);
+        }
+    };
+
+    game.stop = function(){
+
+    };
+
 
 })(jQuery);
