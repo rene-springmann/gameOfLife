@@ -5,14 +5,14 @@
      */
     window.game = window.game || {};
 
-    game.dimensions = {x : 60, y : 40};
+    game.dimensions = {x : 20, y : 20};
     game.playground = null;
     game.cells = {};
     game.debug = false;
     game.startLifePercentage = 30.00;
     game.livingCells = 0;
     game.stepCounter = 0;
-    game.interval = null;
+    game.running = false;
 
     game.init = function(playground){
         this.playground = playground;
@@ -87,39 +87,39 @@
 
     game.evolve = function(){
         console.debug('evolve');
-        var newCells = this.cells;
-        var livingCells= 0;
+        var newCells = game.cells;
+        var livingCells = 0;
 
-        for (var y = 0; y < this.dimensions.y; y++) {
-            for (var x = 0; x < this.dimensions.x; x++) {
+        for (var y = 0; y < game.dimensions.y; y++) {
+            for (var x = 0; x < game.dimensions.x; x++) {
                 var livingNeighbours = 0;
 
                 // left top
-                if(x > 0 && y > 0 && this.cells[y - 1][x - 1]) { livingNeighbours ++; }
+                if(x > 0 && y > 0 && game.cells[y - 1][x - 1]) { livingNeighbours ++; }
                 // top
-                if( y > 0 && this.cells[y - 1][x]) { livingNeighbours ++; }
+                if( y > 0 && game.cells[y - 1][x]) { livingNeighbours ++; }
                 // right top
-                if( (x + 1) < this.dimensions.x && y > 0 && this.cells[y - 1][x + 1]) { livingNeighbours ++; }
+                if( (x + 1) < game.dimensions.x && y > 0 && game.cells[y - 1][x + 1]) { livingNeighbours ++; }
                 // left
-                if( x > 0 && this.cells[y][x - 1]) { livingNeighbours ++; }
+                if( x > 0 && game.cells[y][x - 1]) { livingNeighbours ++; }
                 // right
-                if( (x + 1) < this.dimensions.x && this.cells[y][x + 1]){ livingNeighbours ++; }
+                if( (x + 1) < game.dimensions.x && game.cells[y][x + 1]){ livingNeighbours ++; }
                 // left bottom
-                if( x > 0 && (y + 1) < this.dimensions.y && this.cells[y + 1][x - 1]){ livingNeighbours ++; }
+                if( x > 0 && (y + 1) < game.dimensions.y && game.cells[y + 1][x - 1]){ livingNeighbours ++; }
                 // bottom
-                if( (y + 1) < this.dimensions.y && this.cells[y + 1][x]){ livingNeighbours ++; }
+                if( (y + 1) < game.dimensions.y && game.cells[y + 1][x]){ livingNeighbours ++; }
                 // right bottom
-                if( (y + 1) < this.dimensions.y && (x + 1) < this.dimensions.x && this.cells[y + 1][x + 1]){ livingNeighbours ++; }
+                if( (y + 1) < game.dimensions.y && (x + 1) < game.dimensions.x && game.cells[y + 1][x + 1]){ livingNeighbours ++; }
 
-                if(this.debug) {
-                    var cell = this.playground.find('#cell-' + y + '-' + x);
+                if(game.debug) {
+                    var cell = game.playground.find('#cell-' + y + '-' + x);
                     cell.html(cell.html() + '<br><b>' + livingNeighbours + '</b>');
                 }
 
                 if(livingNeighbours < 2) { // a cell with less then 2 neighbours dies of loneliness
                     newCells[y][x]= false;
                 }
-                else if(livingNeighbours == 2 && this.cells[y][x]) { // a living cell with 2 neighbours stays alive
+                else if(livingNeighbours == 2 && game.cells[y][x]) { // a living cell with 2 neighbours stays alive
                     newCells[y][x]= true;
                     livingCells++;
                 }
@@ -133,31 +133,34 @@
 
             }
         }
-        this.cells = newCells;
-        this.livingCells = livingCells;
-        this.stepCounter ++;
-        this.refreshPlayground();
-    };
 
-    game.start = function(){
+        game.cells = newCells;
+        game.livingCells = livingCells;
+        game.stepCounter ++;
+        game.refreshPlayground();
 
-        $('#start-button').addClass('disabled');
-        $('#single-step-button').addClass('disabled');
-
-        if (!this.interval) {
-            this.interval = setInterval(function() {
-                if (game.livingCells > 0) {
-                    game.evolve();
-                }
-                else {
-                    game.stop();
-                }
-            }, 2000);
+        if (livingCells == 0 || !game.running) {
+            game.stop();
+        }
+        else {
+            setTimeout(game.evolve, 0);
+            //game.evolve();
         }
     };
 
-    game.stop = function(){
+    game.start = function(){
+        $('#start-button').addClass('disabled');
+        $('#single-step-button').addClass('disabled');
+        $('#stop-button').removeClass('disabled');
+        this.running = true;
+        setTimeout(this.evolve, 0);
+    };
 
+    game.stop = function(){
+        this.running = false;
+        $('#start-button').removeClass('disabled');
+        $('#single-step-button').removeClass('disabled');
+        $('#stop-button').addClass('disabled');
     };
 
 
