@@ -13,6 +13,7 @@
     game.livingCells = 0;
     game.stepCounter = 0;
     game.running = false;
+    game.startTime = false;
 
     game.init = function(playground){
         this.playground = playground;
@@ -144,7 +145,6 @@
         }
         else {
             setTimeout(game.evolve, 0);
-            //game.evolve();
         }
     };
 
@@ -153,6 +153,7 @@
         $('#single-step-button').addClass('disabled');
         $('#stop-button').removeClass('disabled');
         this.running = true;
+        this.startTime = new Date().getTime();
         setTimeout(this.evolve, 0);
     };
 
