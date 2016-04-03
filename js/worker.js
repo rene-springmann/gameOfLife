@@ -51,7 +51,6 @@ self.evolve = function(){
     console.debug('evolve');
     var newCells = self.gameStatus.cells;
     var livingCells = 0;
-
     for (var y = 0; y < self.gameSettings.dimensions.y; y++) {
         for (var x = 0; x < self.gameSettings.dimensions.x; x++) {
             var livingNeighbours = 0;
@@ -76,7 +75,7 @@ self.evolve = function(){
             if(livingNeighbours < 2) { // a cell with less then 2 neighbours dies of loneliness
                 newCells[y][x]= false;
             }
-            else if(livingNeighbours == 2 && self.gameSettings.cells[y][x]) { // a living cell with 2 neighbours stays alive
+            else if(livingNeighbours == 2 && self.gameStatus.cells[y][x]) { // a living cell with 2 neighbours stays alive
                 newCells[y][x]= true;
                 livingCells++;
             }
@@ -102,6 +101,10 @@ self.evolve = function(){
         });
     }
     else {
-        setTimeout(self.evolve, 0);
+        self.postMessage({
+            msg     : 'status',
+            status  : self.gameStatus
+        });
+        setTimeout(self.evolve, self.gameSettings.interval);
     }
 };

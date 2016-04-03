@@ -21,7 +21,8 @@
             y : 20
         },
         debug               : false,
-        startLifePercentage : 30.00
+        startLifePercentage : 30.00,
+        interval            : 1000
     };
 
     game.init = function(playground){
