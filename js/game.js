@@ -39,38 +39,56 @@
 
         //Initiate buttons
         $('#single-step-button').click(function(){
-            game.evolve();
-        });
-
-        $('#start-button').click(function(){
             game.sendWorkerCommand({
-                cmd : 'start'
+                cmd : 'single'
             });
         });
 
+        $('#start-button').click(function(){
+            game.start();
+        });
+
         $('#stop-button').click(function(){
-            game.stop();
+            game.sendWorkerCommand({
+                cmd : 'stop'
+            });
         }).addClass('disabled');
 
         //intiate playground
-
          this.drawPlayground();
-         this.fillWithRandom();
-         this.refreshPlayground();
 
+    };
+
+    game.start = function () {
+        if (jQuery.isEmptyObject(game.status.cells)) {
+            this.fillWithRandom();
+            this.refreshPlayground();
+        }
+
+        game.sendWorkerCommand({
+            cmd : 'start'
+        });
     };
 
     game.handleWorkerMessage = function(e){
         var data = e.data;
-        if (this) {
+        if (game.settings.debug) {
             console.log(data);
         }
+        
         if (typeof(data.msg) === 'undefined') {
             return false;
         }
         switch (data.msg) {
             case 'started' :
                 game.started();
+                break;
+            case 'stopped' :
+                game.stoped();
+                break;
+            case 'status' :
+                game.status = data.status;
+                game.refreshPlayground();
                 break;
         }
     };
@@ -104,6 +122,7 @@
                     cell.html(x + '-' + y);
                 }
                 this.status.cells[y][x]= false;
+                //todo: avoid cells beeing filled on first rendering of the playground
             }
         }
         //console.debug(this.cells);
@@ -150,16 +169,17 @@
         $('#start-button').addClass('disabled');
         $('#single-step-button').addClass('disabled');
         $('#stop-button').removeClass('disabled');
+        $('#runtime').data('starttime', moment());
         // this.running = true;
         // this.startTime = new Date().getTime();
         // setTimeout(this.evolve, 0);
     };
 
-    game.stop = function(){
-        this.running = false;
+    game.stoped = function(){
         $('#start-button').removeClass('disabled');
         $('#single-step-button').removeClass('disabled');
         $('#stop-button').addClass('disabled');
+        $('#runtime').data('starttime', '');
     };
 
 

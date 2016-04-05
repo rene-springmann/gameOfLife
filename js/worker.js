@@ -17,6 +17,12 @@ self.addEventListener('message', function(e) {
          case 'start':
              self.start();
              break;
+        case 'stop':
+             self.stop();
+             break;
+        case 'single':
+             self.evolve();
+             break;
         // Example methods
         // case 'start':
         //     self.postMessage('WORKER STARTED: ' + data.msg);
@@ -44,6 +50,14 @@ self.start = function() {
     });
     self.postMessage({
         msg : 'started'
+    });
+};
+
+self.stop = function () {
+    self.gameStatus.running = false;
+
+    self.postMessage({
+        msg : 'stopped'
     });
 };
 
@@ -90,21 +104,21 @@ self.evolve = function(){
         }
     }
 
-    self.gameStatus.cells = newCells;
+    self.gameStatus.cells       = newCells;
     self.gameStatus.livingCells = livingCells;
     self.gameStatus.stepCounter ++;
     // game.refreshPlayground();
-
     if (livingCells == 0 || !self.gameStatus.running) {
+        this.running = false;
         self.postMessage({
             msg : 'stopped'
         });
     }
     else {
-        self.postMessage({
-            msg     : 'status',
-            status  : self.gameStatus
-        });
         setTimeout(self.evolve, self.gameSettings.interval);
     }
+    self.postMessage({
+        msg     : 'status',
+        status  : self.gameStatus
+    });
 };
